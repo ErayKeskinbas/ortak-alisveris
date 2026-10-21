@@ -1,0 +1,36 @@
+name: Java Testleri
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Derleme ve testler
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Projeyi indir
+        uses: actions/checkout@v7
+
+      - name: Java 25 kur
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+
+      - name: Testleri çalıştır ve uygulamayı paketle
+        run: bash ./mvnw --batch-mode -Dspring.profiles.active=test verify
