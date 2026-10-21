@@ -1,0 +1,4 @@
+renode_modules/
+.env
+.env.*
+!.env.example

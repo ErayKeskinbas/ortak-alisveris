@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ortak Alışveriş</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <p class="eyebrow">EVİN İHTİYAÇLARI TEK YERDE</p>
+        <h1>Ortak Alışveriş</h1>
+        <p>Eksikleri ekle, alışverişte işaretle.</p>
+      </header>
+
+      <form id="product-form">
+        <div class="field">
+          <label for="product-name">Ürün adı</label>
+          <input
+            id="product-name"
+            type="text"
+            placeholder="Örneğin süt"
+            maxlength="80"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="product-quantity">Miktar</label>
+          <input
+            id="product-quantity"
+            type="text"
+            placeholder="Örneğin 2 litre"
+            maxlength="40"
+          />
+        </div>
+
+        <button class="add-button" type="submit">Listeye ekle</button>
+      </form>
+
+      <p id="status" class="status" role="status"></p>
+
+      <section aria-labelledby="pending-title">
+        <h2 id="pending-title">
+          Alınacaklar <span id="pending-count">0</span>
+        </h2>
+        <p id="pending-empty" class="empty">
+          Liste boş. İlk ihtiyacını yukarıdan ekle.
+        </p>
+        <ul id="pending-list" class="product-list"></ul>
+      </section>
+
+      <section aria-labelledby="completed-title">
+        <h2 id="completed-title">
+          Alınanlar <span id="completed-count">0</span>
+        </h2>
+        <p id="completed-empty" class="empty">
+          Aldığın ürünler burada görünecek.
+        </p>
+        <ul id="completed-list" class="product-list"></ul>
+      </section>
+
+      <footer>Bu ilk sürümde listen yalnızca bu tarayıcıda saklanır.</footer>
+    </main>
+  </body>
+</html>
