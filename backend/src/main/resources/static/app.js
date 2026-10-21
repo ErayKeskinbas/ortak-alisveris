@@ -197,6 +197,30 @@ async function start() {
   status.textContent = "Liste yükleniyor…";
 
   try {
+    const response = await fetch("/api/household", {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+
+    if (
+      response.status === 401 ||
+      (response.redirected && new URL(response.url).pathname === "/login.html")
+    ) {
+      window.location.assign("/login.html");
+      return;
+    }
+
+    if (!response.ok) {
+      throw new Error("Ev bilgisi alınamadı.");
+    }
+
+    const household = await response.json();
+
+    if (!household.member) {
+      window.location.assign("/household.html");
+      return;
+    }
+
     products = await request();
     loaded = true;
     renderProducts();
@@ -204,7 +228,7 @@ async function start() {
   } catch (error) {
     pendingEmpty.hidden = true;
     completedEmpty.hidden = true;
-    status.textContent = `${error.message} Sunucunun açık olduğunu kontrol edip sayfayı yenile.`;
+    status.textContent = `${error.message} Sunucuyu kontrol edip sayfayı yenile.`;
   } finally {
     setBusy(false);
   }

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Evim | Ortak Alışveriş</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/household.js" defer></script>
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <p class="eyebrow">ORTAK ALIŞVERİŞ</p>
+        <h1>Evim</h1>
+        <p>Bir ev oluştur veya davet koduyla mevcut bir eve katıl.</p>
+      </header>
+
+      <p id="household-status" class="status" role="status">
+        Bilgiler yükleniyor…
+      </p>
+
+      <section id="membership" hidden>
+        <h2 id="household-name"></h2>
+        <p>Evine katılmasını istediğin kişilerle bu kodu paylaş:</p>
+        <p id="invite-code" style="overflow-wrap: anywhere"></p>
+        <a href="/">Alışveriş listesine git</a>
+      </section>
+
+      <div id="household-options" hidden>
+        <section>
+          <h2>Yeni ev oluştur</h2>
+
+          <form id="create-household-form">
+            <div class="field">
+              <label for="household-name-input">Ev adı</label>
+              <input
+                id="household-name-input"
+                placeholder="Örneğin bizim ev"
+                maxlength="80"
+                required
+              />
+            </div>
+
+            <button class="add-button" type="submit">Ev oluştur</button>
+          </form>
+        </section>
+
+        <section>
+          <h2>Bir eve katıl</h2>
+
+          <form id="join-household-form">
+            <div class="field">
+              <label for="invite-code-input">Davet kodu</label>
+              <input
+                id="invite-code-input"
+                autocomplete="off"
+                spellcheck="false"
+                maxlength="32"
+                required
+              />
+            </div>
+
+            <button class="add-button" type="submit">Eve katıl</button>
+          </form>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

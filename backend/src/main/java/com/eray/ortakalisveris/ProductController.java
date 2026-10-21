@@ -1,5 +1,6 @@
 package com.eray.ortakalisveris;
 
+import java.security.Principal;
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -21,16 +22,18 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<Product> getProducts() {
-        return service.getProducts();
+    public List<Product> getProducts(Principal principal) {
+        return service.getProducts(principal.getName());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Product addProduct(
+        Principal principal,
         @Valid @RequestBody CreateProductRequest request
     ) {
         return service.addProduct(
+            principal.getName(),
             request.name(),
             request.quantity()
         );
@@ -38,16 +41,24 @@ public class ProductController {
 
     @PatchMapping("/{id}")
     public Product updateProduct(
+        Principal principal,
         @PathVariable("id") Long id,
         @Valid @RequestBody UpdateProductRequest request
     ) {
-        return service.updateProduct(id, request.completed());
+        return service.updateProduct(
+            principal.getName(),
+            id,
+            request.completed()
+        );
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteProduct(@PathVariable("id") Long id) {
-        service.deleteProduct(id);
+    public void deleteProduct(
+        Principal principal,
+        @PathVariable("id") Long id
+    ) {
+        service.deleteProduct(principal.getName(), id);
     }
 
     public record CreateProductRequest(

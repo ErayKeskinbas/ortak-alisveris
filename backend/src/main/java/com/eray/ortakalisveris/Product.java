@@ -19,12 +19,21 @@ public class Product {
     @Column(nullable = false)
     private boolean completed;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "household_id")
+    private Household household;
+
     protected Product() {
     }
 
-    public Product(String name, String quantity) {
+    public Product(
+        String name,
+        String quantity,
+        Household household
+    ) {
         this.name = name;
         this.quantity = quantity;
+        this.household = household;
         this.completed = false;
     }
 

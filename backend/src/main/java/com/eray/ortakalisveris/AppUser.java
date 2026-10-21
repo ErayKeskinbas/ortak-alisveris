@@ -18,6 +18,9 @@ public class AppUser {
 
     @Column(nullable = false, length = 100)
     private String passwordHash;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "household_id")
+    private Household household;
 
     protected AppUser() {
     }
@@ -46,5 +49,11 @@ public class AppUser {
 
     public String getPasswordHash() {
         return passwordHash;
+    }
+    public Household getHousehold() {
+    return household;
+        }
+    public void setHousehold(Household household) {
+        this.household = household;
     }
 }
