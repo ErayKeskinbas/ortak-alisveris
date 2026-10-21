@@ -1,5 +1,3 @@
-const STORAGE_KEY = "ortak-alisveris-products";
-
 const form = document.querySelector("#product-form");
 const nameInput = document.querySelector("#product-name");
 const quantityInput = document.querySelector("#product-quantity");
@@ -12,46 +10,49 @@ const completedEmpty = document.querySelector("#completed-empty");
 const status = document.querySelector("#status");
 
 let products = [];
+let busy = false;
+let loaded = false;
 
-function loadProducts() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
+async function request(path = "", options = {}) {
+  const response = await fetch(`/api/products${path}`, options);
 
-    if (saved === null) {
-      return;
-    }
-
-    const parsed = JSON.parse(saved);
-
-    if (
-      !Array.isArray(parsed) ||
-      !parsed.every(
-        (product) =>
-          product !== null &&
-          typeof product === "object" &&
-          typeof product.id === "string" &&
-          typeof product.name === "string" &&
-          typeof product.quantity === "string" &&
-          typeof product.completed === "boolean",
-      )
-    ) {
-      throw new Error("Geçersiz liste verisi");
-    }
-
-    products = parsed;
-  } catch {
-    status.textContent =
-      "Kayıtlı liste okunamadı. Yeni eklediğin ürünler mevcut kaydın yerini alır.";
+  if (!response.ok) {
+    throw new Error(`İşlem tamamlanamadı (HTTP ${response.status}).`);
   }
+
+  if (response.status === 204) {
+    return;
+  }
+
+  return response.json();
 }
 
-function saveProducts(message) {
+function setBusy(value) {
+  busy = value;
+
+  form.querySelectorAll("input, button").forEach((element) => {
+    element.disabled = value || !loaded;
+  });
+
+  document.querySelectorAll(".product-actions button").forEach((button) => {
+    button.disabled = value || !loaded;
+  });
+}
+
+async function updateList(action, message) {
+  if (busy) return;
+
+  setBusy(true);
+
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+    await action();
+    products = await request();
+    renderProducts();
     status.textContent = message;
-  } catch {
-    status.textContent =
-      "Değişiklik ekranda uygulandı ancak kaydedilemedi. Sayfayı kapatırsan kaybolabilir.";
+  } catch (error) {
+    status.textContent = `${error.message} Listeyi yenileyerek son durumu kontrol et.`;
+  } finally {
+    setBusy(false);
   }
 }
 
@@ -81,15 +82,18 @@ function createProductElement(product) {
   toggleButton.type = "button";
   toggleButton.className = "toggle-button";
   toggleButton.textContent = product.completed ? "Geri al" : "Alındı";
-  toggleButton.setAttribute(
-    "aria-label",
-    `${product.name}: ${product.completed ? "alınacaklara geri taşı" : "alındı olarak işaretle"}`,
-  );
+  toggleButton.setAttribute("aria-label", `${product.name}: durumunu değiştir`);
 
   toggleButton.addEventListener("click", () => {
-    product.completed = !product.completed;
-    saveProducts("Ürünün durumu güncellendi.");
-    renderProducts();
+    updateList(
+      () =>
+        request(`/${product.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ completed: !product.completed }),
+        }),
+      "Ürünün durumu güncellendi.",
+    );
   });
 
   const deleteButton = document.createElement("button");
@@ -99,9 +103,10 @@ function createProductElement(product) {
   deleteButton.setAttribute("aria-label", `${product.name} ürününü sil`);
 
   deleteButton.addEventListener("click", () => {
-    products = products.filter((item) => item.id !== product.id);
-    saveProducts("Ürün silindi.");
-    renderProducts();
+    updateList(
+      () => request(`/${product.id}`, { method: "DELETE" }),
+      "Ürün silindi.",
+    );
   });
 
   actions.append(toggleButton, deleteButton);
@@ -147,18 +152,33 @@ form.addEventListener("submit", (event) => {
     return;
   }
 
-  products.push({
-    id: crypto.randomUUID(),
-    name,
-    quantity,
-    completed: false,
-  });
+  updateList(async () => {
+    await request("", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, quantity }),
+    });
 
-  saveProducts(`${name} listeye eklendi.`);
-  renderProducts();
-  form.reset();
-  nameInput.focus();
+    form.reset();
+  }, `${name} listeye eklendi.`);
 });
 
-loadProducts();
-renderProducts();
+async function start() {
+  setBusy(true);
+  status.textContent = "Liste yükleniyor…";
+
+  try {
+    products = await request();
+    loaded = true;
+    renderProducts();
+    status.textContent = "";
+  } catch (error) {
+    pendingEmpty.hidden = true;
+    completedEmpty.hidden = true;
+    status.textContent = `${error.message} Sunucunun açık olduğunu kontrol edip sayfayı yenile.`;
+  } finally {
+    setBusy(false);
+  }
+}
+
+start();

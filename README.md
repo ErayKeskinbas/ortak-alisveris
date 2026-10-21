@@ -1,34 +1,20 @@
-# Ortak Alışveriş
+## Sunucu bağlantısı
 
-Aile üyeleri ve ev arkadaşları için geliştirilen alışveriş listesi uygulaması.
+Arayüz, Spring Boot REST API üzerinden ürünleri listeler, ekler,
+alındı durumunu değiştirir ve siler.
 
-## Mevcut özellikler
+Veriler şu anda sunucunun belleğinde tutulur.
+Sunucu yeniden başlatıldığında liste sıfırlanır.
 
-- Ürün adı ve miktarı ekleme
-- Ürünleri alındı olarak işaretleme ve geri alma
-- Ürün silme
-- Listeyi tarayıcıda saklama
-- Mobil ekranlara uyumlu tasarım
+## Sunucuyla çalıştırma
 
-Bu ilk sürümde veriler yalnızca kullanılan tarayıcıda saklanır.
-Kullanıcılar arasında liste paylaşımı henüz bulunmaz.
+Gereksinim: JDK 25
 
-## Kullanılan teknolojiler
+Terminalde backend klasörüne geçip çalıştırın:
 
-- HTML
-- CSS
-- JavaScript
-- localStorage
+    .\mvnw.cmd spring-boot:run
 
-## Çalıştırma
+Tarayıcıdan http://localhost:8080 adresini açın.
 
-Proje klasörünü VS Code ile açın.
-Live Server eklentisini kurun.
-index.html dosyasına sağ tıklayıp "Open with Live Server" seçin.
-
-## Planlanan geliştirmeler
-
-- Java ve Spring Boot ile sunucu
-- PostgreSQL veritabanı
-- Kullanıcı hesapları ve ortak ev oluşturma
-- Ortak listelerin gerçek zamanlı güncellenmesi
+Sunucunun sunduğu arayüz dosyaları:
+backend/src/main/resources/static

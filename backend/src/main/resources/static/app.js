@@ -1,0 +1,184 @@
+const form = document.querySelector("#product-form");
+const nameInput = document.querySelector("#product-name");
+const quantityInput = document.querySelector("#product-quantity");
+const pendingList = document.querySelector("#pending-list");
+const completedList = document.querySelector("#completed-list");
+const pendingCount = document.querySelector("#pending-count");
+const completedCount = document.querySelector("#completed-count");
+const pendingEmpty = document.querySelector("#pending-empty");
+const completedEmpty = document.querySelector("#completed-empty");
+const status = document.querySelector("#status");
+
+let products = [];
+let busy = false;
+let loaded = false;
+
+async function request(path = "", options = {}) {
+  const response = await fetch(`/api/products${path}`, options);
+
+  if (!response.ok) {
+    throw new Error(`İşlem tamamlanamadı (HTTP ${response.status}).`);
+  }
+
+  if (response.status === 204) {
+    return;
+  }
+
+  return response.json();
+}
+
+function setBusy(value) {
+  busy = value;
+
+  form.querySelectorAll("input, button").forEach((element) => {
+    element.disabled = value || !loaded;
+  });
+
+  document.querySelectorAll(".product-actions button").forEach((button) => {
+    button.disabled = value || !loaded;
+  });
+}
+
+async function updateList(action, message) {
+  if (busy) return;
+
+  setBusy(true);
+
+  try {
+    await action();
+    products = await request();
+    renderProducts();
+    status.textContent = message;
+  } catch (error) {
+    status.textContent = `${error.message} Listeyi yenileyerek son durumu kontrol et.`;
+  } finally {
+    setBusy(false);
+  }
+}
+
+function createProductElement(product) {
+  const item = document.createElement("li");
+  item.className = product.completed ? "product completed" : "product";
+
+  const info = document.createElement("div");
+  info.className = "product-info";
+
+  const name = document.createElement("strong");
+  name.className = "product-name";
+  name.textContent = product.name;
+  info.append(name);
+
+  if (product.quantity) {
+    const quantity = document.createElement("span");
+    quantity.className = "product-quantity";
+    quantity.textContent = product.quantity;
+    info.append(quantity);
+  }
+
+  const actions = document.createElement("div");
+  actions.className = "product-actions";
+
+  const toggleButton = document.createElement("button");
+  toggleButton.type = "button";
+  toggleButton.className = "toggle-button";
+  toggleButton.textContent = product.completed ? "Geri al" : "Alındı";
+  toggleButton.setAttribute("aria-label", `${product.name}: durumunu değiştir`);
+
+  toggleButton.addEventListener("click", () => {
+    updateList(
+      () =>
+        request(`/${product.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ completed: !product.completed }),
+        }),
+      "Ürünün durumu güncellendi.",
+    );
+  });
+
+  const deleteButton = document.createElement("button");
+  deleteButton.type = "button";
+  deleteButton.className = "delete-button";
+  deleteButton.textContent = "Sil";
+  deleteButton.setAttribute("aria-label", `${product.name} ürününü sil`);
+
+  deleteButton.addEventListener("click", () => {
+    updateList(
+      () => request(`/${product.id}`, { method: "DELETE" }),
+      "Ürün silindi.",
+    );
+  });
+
+  actions.append(toggleButton, deleteButton);
+  item.append(info, actions);
+
+  return item;
+}
+
+function renderProducts() {
+  pendingList.replaceChildren();
+  completedList.replaceChildren();
+
+  let completedTotal = 0;
+
+  for (const product of products) {
+    const item = createProductElement(product);
+
+    if (product.completed) {
+      completedList.append(item);
+      completedTotal++;
+    } else {
+      pendingList.append(item);
+    }
+  }
+
+  const pendingTotal = products.length - completedTotal;
+
+  pendingCount.textContent = pendingTotal;
+  completedCount.textContent = completedTotal;
+  pendingEmpty.hidden = pendingTotal > 0;
+  completedEmpty.hidden = completedTotal > 0;
+}
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const name = nameInput.value.trim();
+  const quantity = quantityInput.value.trim();
+
+  if (!name) {
+    status.textContent = "Lütfen bir ürün adı yaz.";
+    nameInput.focus();
+    return;
+  }
+
+  updateList(async () => {
+    await request("", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, quantity }),
+    });
+
+    form.reset();
+  }, `${name} listeye eklendi.`);
+});
+
+async function start() {
+  setBusy(true);
+  status.textContent = "Liste yükleniyor…";
+
+  try {
+    products = await request();
+    loaded = true;
+    renderProducts();
+    status.textContent = "";
+  } catch (error) {
+    pendingEmpty.hidden = true;
+    completedEmpty.hidden = true;
+    status.textContent = `${error.message} Sunucunun açık olduğunu kontrol edip sayfayı yenile.`;
+  } finally {
+    setBusy(false);
+  }
+}
+
+start();
