@@ -27,24 +27,15 @@ Proje geliştirme aşamasındadır. Mevcut sürümde alışveriş ekranı, Java 
 - Jakarta Validation
 - Maven
 - Git ve GitHub
-
-## Veri Saklama
-
-Ürünler şu anda sunucunun belleğinde saklanır.
-
-- Sayfa yenilendiğinde ürünler korunur.
-- Sunucu durdurulup yeniden başlatıldığında ürünler silinir.
-- Veritabanı bağlantısı henüz bulunmaz.
-- Aynı sunucuya bağlanan tarayıcılar aynı listeyi kullanır.
-- Diğer tarayıcılarda yapılan değişiklikleri görmek için sayfayı yenilemek gerekir.
-- Kullanıcı hesapları ve erişim kontrolü henüz bulunmaz.
-
-Bu sürüm yerel geliştirme ve öğrenme amaçlıdır.
+- PostgreSQL
+- Spring Data JPA
 
 ## Gereksinimler
 
 - JDK 25
 - Projeyi indirmek için Git
+- PostgreSQL
+- ortak_alisveris veritabanı
 
 Projede Maven Wrapper bulunduğundan ayrıca Maven kurulması gerekmez.
 İlk çalıştırmada gerekli bağımlılıkların indirilmesi için internet bağlantısı gerekir.
@@ -181,7 +172,6 @@ Miktar isteğe bağlıdır ve en fazla 40 karakter olabilir.
 
 ## Planlanan Geliştirmeler
 
-- PostgreSQL ile kalıcı veri saklama
 - Sunucu kodunu controller, service ve repository katmanlarına ayırma
 - Kullanıcı kaydı ve giriş
 - Ev oluşturma ve davet koduyla katılma
@@ -189,6 +179,16 @@ Miktar isteğe bağlıdır ve en fazla 40 karakter olabilir.
 - Gerçek zamanlı liste güncellemeleri
 - Otomatik testler
 - Uygulamayı yayına alma
+
+## Veri Saklama
+
+Ürünler PostgreSQL veritabanında saklanır.
+
+- Sayfa yenilendiğinde ve uygulama sunucusu yeniden başlatıldığında ürünler korunur.
+- Uygulamanın çalışması için PostgreSQL sunucusu açık olmalıdır.
+- Aynı uygulama sunucusuna bağlanan tarayıcılar aynı listeyi kullanır.
+- Diğer tarayıcılardaki değişiklikleri görmek için sayfayı yenilemek gerekir.
+- Kullanıcı hesapları ve eve özel erişim kontrolü henüz bulunmaz.
 
 ## Geliştirici
 
