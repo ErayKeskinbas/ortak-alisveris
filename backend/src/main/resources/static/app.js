@@ -14,7 +14,36 @@ let busy = false;
 let loaded = false;
 
 async function request(path = "", options = {}) {
-  const response = await fetch(`/api/products${path}`, options);
+  const headers = new Headers(options.headers);
+  const method = (options.method || "GET").toUpperCase();
+
+  if (!["GET", "HEAD", "OPTIONS"].includes(method)) {
+    const csrfResponse = await fetch("/api/csrf", {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+
+    if (!csrfResponse.ok) {
+      throw new Error("İstek doğrulama bilgisi alınamadı.");
+    }
+
+    const csrf = await csrfResponse.json();
+    headers.set(csrf.headerName, csrf.token);
+  }
+
+  const response = await fetch(`/api/products${path}`, {
+    ...options,
+    headers,
+    credentials: "same-origin",
+  });
+
+  if (
+    response.status === 401 ||
+    (response.redirected && new URL(response.url).pathname === "/login")
+  ) {
+    window.location.assign("/login");
+    throw new Error("Tekrar giriş yapman gerekiyor.");
+  }
 
   if (!response.ok) {
     throw new Error(`İşlem tamamlanamadı (HTTP ${response.status}).`);

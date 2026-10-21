@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hesap oluştur | Ortak Alışveriş</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/register.js" defer></script>
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <p class="eyebrow">ORTAK ALIŞVERİŞ</p>
+        <h1>Hesap oluştur</h1>
+        <p>Alışveriş listeni yönetmeye başla.</p>
+      </header>
+
+      <form id="register-form">
+        <div class="field">
+          <label for="display-name">Adın</label>
+          <input
+            id="display-name"
+            autocomplete="name"
+            maxlength="80"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="email">E-posta</label>
+          <input
+            id="email"
+            type="email"
+            autocomplete="email"
+            maxlength="254"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="password">Şifre</label>
+          <input
+            id="password"
+            type="password"
+            autocomplete="new-password"
+            minlength="12"
+            maxlength="72"
+            aria-describedby="password-help"
+            required
+          />
+          <small id="password-help">
+            En az 12 karakter kullan. Türkçe karakterler dahil, şifre UTF-8
+            biçiminde en fazla 72 bayt olabilir.
+          </small>
+        </div>
+
+        <div class="field">
+          <label for="password-confirm">Şifre tekrar</label>
+          <input
+            id="password-confirm"
+            type="password"
+            autocomplete="new-password"
+            minlength="12"
+            maxlength="72"
+            required
+          />
+        </div>
+
+        <button class="add-button" type="submit">Hesap oluştur</button>
+      </form>
+
+      <p id="register-status" class="status" role="status"></p>
+
+      <footer>Zaten hesabın var mı? <a href="/login">Giriş yap</a></footer>
+    </main>
+  </body>
+</html>
