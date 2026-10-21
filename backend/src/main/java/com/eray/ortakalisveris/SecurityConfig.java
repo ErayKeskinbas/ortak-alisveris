@@ -49,6 +49,8 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/api/auth/register",
                     "/api/csrf",
+                    "/login.html",
+                    "/login.js",
                     "/register.html",
                     "/register.js",
                     "/style.css",
@@ -57,11 +59,14 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
+                .loginPage("/login.html")
+                .loginProcessingUrl("/login")
+                .failureUrl("/login.html?error")
                 .defaultSuccessUrl("/", true)
-                .permitAll()
-            )
+            .permitAll()
+)
             .logout(logout -> logout
-                .logoutSuccessUrl("/login?logout")
+                .logoutSuccessUrl("/login.html?logout")
                 .permitAll()
             );
 

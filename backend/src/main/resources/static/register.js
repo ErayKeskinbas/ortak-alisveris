@@ -69,7 +69,7 @@ registerForm.addEventListener("submit", async (event) => {
     }
 
     registerForm.reset();
-    window.location.assign("/login?registered");
+    window.location.assign("/login.html?registered");
   } catch (error) {
     registerStatus.textContent = error.message;
   } finally {

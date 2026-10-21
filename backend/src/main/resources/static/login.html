@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Giriş yap | Ortak Alışveriş</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/login.js" defer></script>
+  </head>
+  <body>
+    <main class="container">
+      <header>
+        <p class="eyebrow">ORTAK ALIŞVERİŞ</p>
+        <h1>Giriş yap</h1>
+        <p>Alışveriş listene kaldığın yerden devam et.</p>
+      </header>
+
+      <form id="login-form" action="/login" method="post">
+        <div class="field">
+          <label for="email">E-posta</label>
+          <input
+            id="email"
+            name="username"
+            type="email"
+            autocomplete="username"
+            maxlength="254"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="password">Şifre</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            required
+          />
+        </div>
+
+        <button id="login-button" class="add-button" type="submit" disabled>
+          Giriş yap
+        </button>
+      </form>
+
+      <p id="login-status" class="status" role="status"></p>
+
+      <noscript>Giriş yapabilmek için JavaScript’i etkinleştir.</noscript>
+
+      <footer>Hesabın yok mu? <a href="/register.html">Kayıt ol</a></footer>
+    </main>
+  </body>
+</html>

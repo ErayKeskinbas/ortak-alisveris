@@ -39,9 +39,9 @@ async function request(path = "", options = {}) {
 
   if (
     response.status === 401 ||
-    (response.redirected && new URL(response.url).pathname === "/login")
+    (response.redirected && new URL(response.url).pathname === "/login.html")
   ) {
-    window.location.assign("/login");
+    window.location.assign("/login.html");
     throw new Error("Tekrar giriş yapman gerekiyor.");
   }
 
@@ -211,3 +211,39 @@ async function start() {
 }
 
 start();
+
+const logoutButton = document.querySelector("#logout-button");
+
+logoutButton.addEventListener("click", async () => {
+  logoutButton.disabled = true;
+
+  try {
+    const response = await fetch("/api/csrf", {
+      credentials: "same-origin",
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error("Çıkış yapılamadı. Tekrar dene.");
+    }
+
+    const csrf = await response.json();
+
+    const logoutForm = document.createElement("form");
+    logoutForm.method = "post";
+    logoutForm.action = "/logout";
+    logoutForm.hidden = true;
+
+    const tokenInput = document.createElement("input");
+    tokenInput.type = "hidden";
+    tokenInput.name = csrf.parameterName;
+    tokenInput.value = csrf.token;
+
+    logoutForm.append(tokenInput);
+    document.body.append(logoutForm);
+    logoutForm.submit();
+  } catch {
+    status.textContent = "Çıkış yapılamadı. Sayfayı yenileyip tekrar dene.";
+    logoutButton.disabled = false;
+  }
+});
