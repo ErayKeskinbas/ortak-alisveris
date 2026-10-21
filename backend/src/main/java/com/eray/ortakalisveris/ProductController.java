@@ -7,35 +7,33 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/products")
 public class ProductController {
 
-    private final ProductRepository repository;
+    private final ProductService service;
 
-    public ProductController(ProductRepository repository) {
-        this.repository = repository;
+    public ProductController(ProductService service) {
+        this.service = service;
     }
 
     @GetMapping
     public List<Product> getProducts() {
-        return repository.findAll(Sort.by("id").ascending());
+        return service.getProducts();
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Product addProduct(@Valid @RequestBody CreateProductRequest request) {
-        Product product = new Product(
-            request.name().trim(),
-            request.quantity() == null ? "" : request.quantity().trim()
+    public Product addProduct(
+        @Valid @RequestBody CreateProductRequest request
+    ) {
+        return service.addProduct(
+            request.name(),
+            request.quantity()
         );
-
-        return repository.save(product);
     }
 
     @PatchMapping("/{id}")
@@ -43,24 +41,13 @@ public class ProductController {
         @PathVariable("id") Long id,
         @Valid @RequestBody UpdateProductRequest request
     ) {
-        Product product = findProduct(id);
-        product.setCompleted(request.completed());
-
-        return repository.save(product);
+        return service.updateProduct(id, request.completed());
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProduct(@PathVariable("id") Long id) {
-        Product product = findProduct(id);
-        repository.delete(product);
-    }
-
-    private Product findProduct(Long id) {
-        return repository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "Ürün bulunamadı"
-            ));
+        service.deleteProduct(id);
     }
 
     public record CreateProductRequest(
