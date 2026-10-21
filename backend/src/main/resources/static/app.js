@@ -13,6 +13,11 @@ let products = [];
 let busy = false;
 let loaded = false;
 
+let listRevision = 0;
+let refreshInProgress = false;
+
+const syncStatus = document.querySelector("#sync-status");
+
 async function request(path = "", options = {}) {
   const headers = new Headers(options.headers);
   const method = (options.method || "GET").toUpperCase();
@@ -35,6 +40,7 @@ async function request(path = "", options = {}) {
     ...options,
     headers,
     credentials: "same-origin",
+    cache: "no-store",
   });
 
   if (
@@ -71,6 +77,7 @@ function setBusy(value) {
 async function updateList(action, message) {
   if (busy) return;
 
+  listRevision++;
   setBusy(true);
 
   try {
@@ -269,5 +276,45 @@ logoutButton.addEventListener("click", async () => {
   } catch {
     status.textContent = "Çıkış yapılamadı. Sayfayı yenileyip tekrar dene.";
     logoutButton.disabled = false;
+  }
+});
+
+async function refreshSharedList() {
+  if (!loaded || busy || refreshInProgress || document.hidden) {
+    return;
+  }
+
+  refreshInProgress = true;
+  const revisionAtStart = listRevision;
+
+  try {
+    const latestProducts = await request();
+
+    // Bu sırada kullanıcı işlem yaptıysa eski sonucu uygulama.
+    if (busy || revisionAtStart !== listRevision) {
+      return;
+    }
+
+    // Liste değişmediyse ekranı gereksiz yere yeniden oluşturma.
+    if (JSON.stringify(products) !== JSON.stringify(latestProducts)) {
+      products = latestProducts;
+      renderProducts();
+    }
+
+    syncStatus.textContent =
+      "Ortak liste güncel · 5 saniyede bir kontrol edilir.";
+  } catch {
+    syncStatus.textContent =
+      "Liste güncellenemedi. Bağlantı geldiğinde tekrar denenecek.";
+  } finally {
+    refreshInProgress = false;
+  }
+}
+
+setInterval(refreshSharedList, 5000);
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) {
+    refreshSharedList();
   }
 });
