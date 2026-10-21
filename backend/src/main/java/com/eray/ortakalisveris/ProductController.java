@@ -1,15 +1,13 @@
 package com.eray.ortakalisveris;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -18,30 +16,26 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/products")
 public class ProductController {
 
-    private final Map<Long, Product> products = new ConcurrentHashMap<>();
-    private final AtomicLong nextId = new AtomicLong(0);
+    private final ProductRepository repository;
+
+    public ProductController(ProductRepository repository) {
+        this.repository = repository;
+    }
 
     @GetMapping
     public List<Product> getProducts() {
-        return products.values().stream()
-            .sorted(Comparator.comparing(Product::id))
-            .toList();
+        return repository.findAll(Sort.by("id").ascending());
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Product addProduct(@Valid @RequestBody CreateProductRequest request) {
-        long id = nextId.incrementAndGet();
-
         Product product = new Product(
-            id,
             request.name().trim(),
-            request.quantity() == null ? "" : request.quantity().trim(),
-            false
+            request.quantity() == null ? "" : request.quantity().trim()
         );
 
-        products.put(id, product);
-        return product;
+        return repository.save(product);
     }
 
     @PatchMapping("/{id}")
@@ -49,41 +43,25 @@ public class ProductController {
         @PathVariable("id") Long id,
         @Valid @RequestBody UpdateProductRequest request
     ) {
-        Product updated = products.computeIfPresent(
-            id,
-            (key, current) -> new Product(
-                current.id(),
-                current.name(),
-                current.quantity(),
-                request.completed()
-            )
-        );
+        Product product = findProduct(id);
+        product.setCompleted(request.completed());
 
-        if (updated == null) {
-            throw new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "Ürün bulunamadı"
-            );
-        }
-
-        return updated;
+        return repository.save(product);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProduct(@PathVariable("id") Long id) {
-        if (products.remove(id) == null) {
-            throw new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "Ürün bulunamadı"
-            );
-        }
+        Product product = findProduct(id);
+        repository.delete(product);
     }
 
-    public record Product(
-        Long id,
-        String name,
-        String quantity,
-        boolean completed
-    ) {}
+    private Product findProduct(Long id) {
+        return repository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Ürün bulunamadı"
+            ));
+    }
 
     public record CreateProductRequest(
         @NotBlank @Size(max = 80) String name,
@@ -91,6 +69,6 @@ public class ProductController {
     ) {}
 
     public record UpdateProductRequest(
-        @jakarta.validation.constraints.NotNull Boolean completed
+        @NotNull Boolean completed
     ) {}
 }
